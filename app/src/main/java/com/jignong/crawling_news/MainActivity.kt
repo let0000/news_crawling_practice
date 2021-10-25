@@ -4,6 +4,9 @@ import android.content.ClipData
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,19 +33,61 @@ class MainActivity : AppCompatActivity() {
 
         news_recyclerview = activityMainBinding.newsRecyclerview
 
-        getNews(newsUrl)
-
         // 뉴스 카테고리 스피너 추가
+        var category = resources.getStringArray(R.array.category)
+        var news_adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, category)
+        activityMainBinding.newsSpinner.adapter = news_adapter
+        activityMainBinding.newsSpinner.setSelection(0)
+        activityMainBinding.newsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                when (position) {
+                    0 -> {
+                        news.clear()
+                        getNews(newsUrl, "politics")
+                    }
+                    1 -> {
+                        news.clear()
+                        getNews(newsUrl, "economy")
+                    }
+                    2 -> {
+                        news.clear()
+                        getNews(newsUrl, "society")
+                    }
+                    3 -> {
+                        news.clear()
+                        getNews(newsUrl, "life")
+                    }
+                    4 -> {
+                        news.clear()
+                        getNews(newsUrl, "world")
+                    }
+                    5 -> {
+                        news.clear()
+                        getNews(newsUrl, "it")
+                    }
+                }
 
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+
+        }
 
     }
 
-    private fun getNews(Url : String){
+    private fun getNews(Url : String, category : String){
         CoroutineScope(Dispatchers.IO).launch {
             val doc = Jsoup.connect(Url).get()
-            val headline = doc.select("#section_politics > div.com_list > div > ul")
+            val headline = doc.select("#section_$category > div.com_list > div > ul")
 
-            for (i in 0 until 5) {
+            for (i in 0 until 3) {
                 val title = headline.select("li a").get(i).text()
                 val news_url = headline.select("li a").get(i).attr("href")
                 val writing = headline.select("li span[class=writing]").get(i).text()
@@ -57,7 +102,6 @@ class MainActivity : AppCompatActivity() {
 
                 news_recyclerview.layoutManager = LinearLayoutManager(this@MainActivity)
                 news_recyclerview.adapter = MyAdapter(news)
-
             }
         }
     }
