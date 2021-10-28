@@ -102,6 +102,7 @@ class MainActivity : AppCompatActivity() {
 
                 news_recyclerview.layoutManager = LinearLayoutManager(this@MainActivity)
                 news_recyclerview.adapter = MyAdapter(news)
+
             }
         }
     }
