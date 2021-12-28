@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         private var TAG = "로그"
     }
 
-    private val newsUrl = "https://news.naver.com/main/home.naver"
+    private val newsUrl = "https://news.naver.com/main/tv/index.naver?mid=tvh"
     var news : ArrayList<news> = arrayListOf()
     lateinit var news_recyclerview : RecyclerView
 
@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         news_recyclerview = activityMainBinding.newsRecyclerview
 
-        // 뉴스 카테고리 스피너 추가
+        //뉴스 카테고리 스피너 추가
         var category = resources.getStringArray(R.array.category)
         var news_adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, category)
         activityMainBinding.newsSpinner.adapter = news_adapter
@@ -48,27 +48,31 @@ class MainActivity : AppCompatActivity() {
                 when (position) {
                     0 -> {
                         news.clear()
-                        getNews(newsUrl, "politics")
+                        getNews(newsUrl, "2")
                     }
                     1 -> {
                         news.clear()
-                        getNews(newsUrl, "economy")
+                        getNews(newsUrl, "3")
                     }
                     2 -> {
                         news.clear()
-                        getNews(newsUrl, "society")
+                        getNews(newsUrl, "4")
                     }
                     3 -> {
                         news.clear()
-                        getNews(newsUrl, "life")
+                        getNews(newsUrl, "5")
                     }
                     4 -> {
                         news.clear()
-                        getNews(newsUrl, "world")
+                        getNews(newsUrl, "6")
                     }
                     5 -> {
                         news.clear()
-                        getNews(newsUrl, "it")
+                        getNews(newsUrl, "7")
+                    }
+                    6 -> {
+                        news.clear()
+                        getNews(newsUrl, "8")
                     }
                 }
 
@@ -82,23 +86,22 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun getNews(Url : String, category : String){
+    private fun getNews(Url : String , category : String){
         CoroutineScope(Dispatchers.IO).launch {
             val doc = Jsoup.connect(Url).get()
-            val headline = doc.select("#section_$category > div.com_list > div > ul")
+            val headline = doc.select("#wrap > table > tbody > tr > td.content > div > div > div:nth-child($category) > ul")
 
-            for (i in 0 until 3) {
-                val title = headline.select("li a").get(i).text()
+
+            for (i in 0 until 4) {
+                val title = headline.select("li p").get(i).text()
                 val news_url = headline.select("li a").get(i).attr("href")
-                val writing = headline.select("li span[class=writing]").get(i).text()
-                val list = news(title, news_url, writing)
+                val list = news(title, news_url)
                 news.add(list)
             }
 
             CoroutineScope(Dispatchers.Main).launch {
-                Log.d(TAG, "뉴스 : ${news[0].title}")
-                Log.d(TAG, "링크 : ${news[0].news_url}")
-                Log.d(TAG, "언론사 : ${news[0].writing} ")
+                Log.d(TAG, "뉴스 : ${news[0].title}, ${news[1].title}")
+                Log.d(TAG, "링크 : ${news[0].news_url} , ${news[1].news_url}")
 
                 news_recyclerview.layoutManager = LinearLayoutManager(this@MainActivity)
                 news_recyclerview.adapter = MyAdapter(news)
@@ -108,4 +111,4 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-data class news (val title : String, val news_url : String, val writing : String)
+data class news (val title : String, val news_url : String)
